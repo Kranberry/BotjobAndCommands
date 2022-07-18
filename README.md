@@ -4,7 +4,7 @@ A project I made for fun without any specific reason.
 ## The project is originally written in C# 10 .Net 6
 This project is a ***Console Application*** that stays alive until the ***ManualResetEvent*** has been .Set().
 > Current versions
-> C# 10 .Net6
+> C# 10 .Net 6
 
 ## Create a new bot job
 Create a new class that implements the IBotJob interface. And that's it, it will now automatically start following the given Cron expression.
