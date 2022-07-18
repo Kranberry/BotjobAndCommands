@@ -7,6 +7,7 @@ This project is a ***Console Application*** that stays alive until the ***Manual
 > C# 10 .Net 6
 
 ## Create a new bot job
+OBS... This does not yet work :D (The automatic part)
 Create a new class that implements the IBotJob interface. And that's it, it will now automatically start following the given Cron expression.
 
 ## Create a new Command
