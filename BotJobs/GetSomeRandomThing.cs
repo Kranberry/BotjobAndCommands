@@ -2,19 +2,24 @@
 
 namespace BotJobAndCommands.BotJobs;
 
-public class GetSomeRandomThing : IBotJob
+public class GetSomeRandomThing : IBotJob, IHttpClientDependent
 {
     public Guid ID { get; set; }
     public CrontabSchedule Schedule { get; set ; }
 
     private readonly string BaseUrl = "https://evilinsult.com/";
-    private HttpClient HttpClient;
+    public HttpClient HttpClient { get; private set; }
+    public Action<IBotJob> JobHasFinished { get; set; }
+    public bool IsFireAndForget { get; init; } = true;
 
-    public GetSomeRandomThing(HttpClient client)
+    public void AddHttpClient(HttpClient client)
+    {
+        HttpClient = client;
+    }
+
+    public GetSomeRandomThing()
     {
         ID = Guid.NewGuid();
-        HttpClient = client;
-        HttpClient.BaseAddress = new Uri(BaseUrl);
         CrontabSchedule.ParseOptions asd = new();
         asd.IncludingSeconds = true;
         Schedule = CrontabSchedule.Parse("*/27 * * * * *", asd);
@@ -31,7 +36,7 @@ public class GetSomeRandomThing : IBotJob
 
     private async Task<string> GetThing()
     {
-        HttpResponseMessage response = await HttpClient.GetAsync("generate_insult.php?lang=en&amp;type=json");
+        HttpResponseMessage response = await HttpClient.GetAsync(BaseUrl + "generate_insult.php?lang=en&amp;type=json");
         return await response.Content.ReadAsStringAsync();
     }
 }

@@ -6,6 +6,8 @@ public class SomeJob : IBotJob
 {
     public Guid ID { get; set; }
     public CrontabSchedule Schedule { get; set; }
+    public Action<IBotJob> JobHasFinished { get; set; }
+    public bool IsFireAndForget { get; init; } = false;
 
     public SomeJob()
     {
@@ -17,5 +19,6 @@ public class SomeJob : IBotJob
         await Task.Delay(2);
         Console.WriteLine(ID);
         Console.WriteLine("AHHHHHHHHHHHHHHHHHHHH");
+        JobHasFinished(this);
     }
 }

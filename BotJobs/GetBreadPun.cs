@@ -2,15 +2,21 @@
 
 namespace BotJobAndCommands.BotJobs;
 
-public class GetBreadPun : IBotJob
+public class GetBreadPun : IBotJob, IHttpClientDependent
 {
     public Guid ID { get; set; }
-    private HttpClient HttpClient { get; set; }
+    public HttpClient HttpClient { get; private set; }
     public CrontabSchedule Schedule { get ; set; }
+    public Action<IBotJob> JobHasFinished { get; set; }
+    public bool IsFireAndForget { get; init; } = false;
 
-    public GetBreadPun(HttpClient client)
+    public void AddHttpClient(HttpClient client)
     {
         HttpClient = client;
+    }
+
+    public GetBreadPun()
+    {
         CrontabSchedule.ParseOptions asd = new();
         asd.IncludingSeconds = true;
         Schedule = CrontabSchedule.Parse("0 */1 * * * *", asd);
@@ -22,6 +28,7 @@ public class GetBreadPun : IBotJob
         Console.ForegroundColor = ConsoleColor.Green;
         Console.WriteLine(response);
         Console.ResetColor();
+        JobHasFinished(this);
     }
 
     private async Task<string> GetThing()

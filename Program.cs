@@ -1,15 +1,13 @@
 ﻿using BotJobAndCommands;
 using BotJobAndCommands.BotJobs;
+using NCrontab;
 using System.Reflection;
 using static PublicReadonlyProperties;
 
 HttpClient httpClient = new();
 Worker worker = new();
-//worker.RegisterJob(new GetSomeRandomThing(client));
-//worker.RegisterJob(new GetBreadPun(client));
-worker.RegisterJob(new SomeJob());
-worker.RegisterJob(new SomeOtherJob());
 
+RegisterJobs<IBotJob>(worker, httpClient);
 SetupCommands<ICommand>(httpClient);
 
 Task consoleReadTask = new(async () =>
@@ -43,6 +41,39 @@ Console.ResetColor();
 #endregion
 
 
+void RestartRecurringJob(IBotJob job)
+{
+    CrontabSchedule schedule = job.Schedule;
+
+    DateTime nextTime = schedule.GetNextOccurrence(DateTime.UtcNow);
+    TimeSpan timeSpawn = nextTime - DateTime.UtcNow;
+
+    Task.Delay(timeSpawn).ContinueWith(t => job.StartJobAsync());
+}
+
+void RegisterJobs<T>(Worker worker, HttpClient client) where T : IBotJob
+{
+    IEnumerable<Type> jobTypes = GetAllTypesThatImplementsInterface<T>();
+
+    foreach (Type type in jobTypes)
+    {
+        T instance = (T)Activator.CreateInstance(type)!;
+        worker.RegisterJob(instance);
+
+        if (instance is IHttpClientDependent dependent)
+        {
+            dependent.AddHttpClient(client);
+        }
+
+        if (!instance.IsFireAndForget)
+        {
+            instance.JobHasFinished += RestartRecurringJob;
+        }
+
+        instance.StartJobAsync();
+        Console.WriteLine("Registered job");
+    }
+}
 
 void SetupCommands<T>(HttpClient httpClient) where T : ICommand
 {
