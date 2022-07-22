@@ -7,10 +7,12 @@ public class HelpCommand : ICommand
     public string Command { get; init; } = "Help";
     public string? ShortCommand { get; init; }
     public string Description { get; init; } = "Shows every command and their description";
+    public bool IsBotCommand { get; init; } = false;
 
-    public async ValueTask RunCommand(string[] parameters)
+    public async ValueTask<CommandResponse> RunCommand(string[] parameters)
     {
         ShowHelpPrompt();
+        return new CommandResponse(Command, "Available commands listed", null);
     }
 
     private void ShowHelpPrompt()

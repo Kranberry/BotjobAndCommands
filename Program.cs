@@ -1,13 +1,15 @@
 ﻿using BotJobAndCommands;
 using BotJobAndCommands.BotJobs;
+using BotJobAndCommands.DiscordBot;
 using NCrontab;
 using System.Reflection;
 using static PublicReadonlyProperties;
 
 HttpClient httpClient = new();
 Worker worker = new();
+DiscordBot discordBot = new(AvailableCommands);
 
-RegisterJobs<IBotJob>(worker, httpClient);
+//RegisterJobs<IBotJob>(worker, httpClient);
 SetupCommands<ICommand>(httpClient);
 
 Task consoleReadTask = new(async () =>
@@ -26,6 +28,8 @@ Task consoleReadTask = new(async () =>
     }
 });
 consoleReadTask.Start();
+
+_ = discordBot.MainAsync();
 
 #region Block the application to close until MyManualResetEvent is set
 

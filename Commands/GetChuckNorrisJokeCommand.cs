@@ -9,13 +9,14 @@ public class GetChuckNorrisJokeCommand : ICommand, IHttpClientDependent
     public string? ShortCommand { get; init; } = "CNJG";
     public string Description { get; init; } = "Get a chuck norris joke via REST";
     public HttpClient HttpClient { get; private set; }
+    public bool IsBotCommand { get; init; } = true;
 
     public void AddHttpClient(HttpClient client)
     {
         HttpClient = client;
     }
 
-    public async ValueTask RunCommand(string[] parameters)
+    public async ValueTask<CommandResponse> RunCommand(string[] parameters)
     {
         if(HttpClient is null)
         {
@@ -24,6 +25,7 @@ public class GetChuckNorrisJokeCommand : ICommand, IHttpClientDependent
 
         ChuckNorrisJoke cnj = await GetChuckNorrisJoke();
         Console.WriteLine(cnj.Value);
+        return new CommandResponse(Command, "Chuck norris joke got", new(cnj.Value));
     }
 
     private async ValueTask<ChuckNorrisJoke> GetChuckNorrisJoke()

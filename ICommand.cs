@@ -18,8 +18,17 @@ public interface ICommand
     public string Description { get; init; }
 
     /// <summary>
+    /// If true, this command should be allowed to be used by something like a discord bot.
+    /// </summary>
+    public bool IsBotCommand { get; init; }
+
+    /// <summary>
     /// Run the command
     /// </summary>
     /// <param name="parameters">The parameters for said command</param>
-    public ValueTask RunCommand(string[] parameters);
+    public ValueTask<CommandResponse> RunCommand(string[] parameters);
 }
+
+public record CommandResponse(string Command, string Message, DiscordBotReponse? BotResponse);
+
+public record DiscordBotReponse(string ResponseMessage);
