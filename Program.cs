@@ -1,6 +1,7 @@
 ﻿using BotJobAndCommands;
 using BotJobAndCommands.BotJobs;
 using BotJobAndCommands.DiscordBot;
+using BotJobAndCommands.SocketServer;
 using NCrontab;
 using System.Reflection;
 using static PublicReadonlyProperties;
@@ -8,9 +9,11 @@ using static PublicReadonlyProperties;
 HttpClient httpClient = new();
 Worker worker = new();
 DiscordBot discordBot = new(AvailableCommands);
+WebSocketServer socketServer = new(AvailableCommands);
 
 //RegisterJobs<IBotJob>(worker, httpClient);
 SetupCommands<ICommand>(httpClient);
+Task.Run(socketServer.Start);
 
 Task consoleReadTask = new(async () =>
 {
