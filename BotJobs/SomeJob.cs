@@ -5,7 +5,7 @@ namespace BotJobAndCommands.BotJobs;
 public class SomeJob : IBotJob
 {
     public Guid ID { get; set; }
-    public CrontabSchedule Schedule { get; set; }
+    public CrontabSchedule Schedule { get; init; }
     public Action<IBotJob> JobHasFinished { get; set; }
     public bool IsFireAndForget { get; init; } = false;
 

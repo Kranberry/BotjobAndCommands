@@ -5,7 +5,7 @@ namespace BotJobAndCommands.BotJobs;
 public class GetSomeRandomThing : IBotJob, IHttpClientDependent
 {
     public Guid ID { get; set; }
-    public CrontabSchedule Schedule { get; set ; }
+    public CrontabSchedule Schedule { get; init; }
 
     private readonly string BaseUrl = "https://evilinsult.com/";
     public HttpClient HttpClient { get; private set; }

@@ -28,16 +28,16 @@ public class WebSocketServer
 
         TcpClient client = server.AcceptTcpClient();
 
-        NetworkStream stream = client.GetStream();
+        NetworkStream clientStream = client.GetStream();
 
         // enter to an infinite cycle to be able to handle every change in stream
         while (true)
         {
-            while (!stream.DataAvailable) ;
+            while (!clientStream.DataAvailable) ;
             while (client.Available < 3) ; // match against "get"
 
             byte[] bytes = new byte[client.Available];
-            stream.Read(bytes, 0, client.Available);
+            clientStream.Read(bytes, 0, client.Available);
             string s = Encoding.UTF8.GetString(bytes);
 
             if (Regex.IsMatch(s, "^GET", RegexOptions.IgnoreCase))
@@ -60,11 +60,11 @@ public class WebSocketServer
                     "Upgrade: websocket\r\n" +
                     "Sec-WebSocket-Accept: " + swkaSha1Base64 + "\r\n\r\n");
 
-                stream.Write(response, 0, response.Length);
+                clientStream.Write(response, 0, response.Length);
             }
             else
             {
-                bool fin = (bytes[0] & 0b10000000) != 0,
+                bool fin = (bytes[0] & 0b10000000) != 0, 
                     mask = (bytes[1] & 0b10000000) != 0; // must be true, "All messages from the client to the server have this bit set"
                 int opcode = bytes[0] & 0b00001111, // expecting 1 - text message
                     offset = 2;
@@ -101,7 +101,16 @@ public class WebSocketServer
                     Console.WriteLine("{0}", text);
                     WsClientData data = JsonSerializer.Deserialize<WsClientData>(text)!;
 
-                    await RunClientCommand(data);
+                    //string response = await RunClientCommand(data);
+                    Socket socket = client.GetStream().Socket;
+                    string response = "AHHHHHHH";
+                    byte[] bytesResponse = Encoding.UTF8.GetBytes(response);
+
+                    client.Client.Send(bytesResponse);
+                    SendMessage(socket, response);
+                    socket.Send(bytesResponse);
+                    clientStream.Write(bytesResponse, 0, bytesResponse.Length);
+                    
                 }
                 else
                     Console.WriteLine("mask bit not set");
@@ -111,14 +120,29 @@ public class WebSocketServer
         }
     }
 
-    private async Task RunClientCommand(WsClientData data)
+    private void SendMessage(Socket socket, string message)
     {
-        switch (data.Command)
+        byte[] asd = Encoding.UTF8.GetBytes(message);
+        socket.Send(asd);
+    }
+
+    private async Task<string> RunClientCommand(WsClientData data)
+    {
+        try
         {
-            case WebSocketClientCommand.Command:
-                await RunCommand(data.Data["command"].ToString()!);
-                break;
+            switch (data.Command)
+            {
+                case WebSocketClientCommand.Command:
+                    await RunCommand(data.Data["command"].ToString()!);
+                    break;
+            }
         }
+        catch(Exception e)
+        {
+            return $"Bad Stuff duud, {e.Message}";
+        }
+
+        return "Success";
     }
 
     private async Task RunCommand(string command)

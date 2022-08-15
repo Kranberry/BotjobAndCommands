@@ -9,11 +9,11 @@ using static PublicReadonlyProperties;
 HttpClient httpClient = new();
 Worker worker = new();
 DiscordBot discordBot = new(AvailableCommands);
-WebSocketServer socketServer = new(AvailableCommands);
+//WebSocketServer socketServer = new(AvailableCommands);
 
 //RegisterJobs<IBotJob>(worker, httpClient);
 SetupCommands<ICommand>(httpClient);
-Task.Run(socketServer.Start);
+//Task.Run(socketServer.Start);
 
 Task consoleReadTask = new(async () =>
 {
