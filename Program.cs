@@ -20,12 +20,12 @@ Task consoleReadTask = new(async () =>
     Console.WriteLine("Type 'help' for a list of commands");
     while (true)
     {
-        string command = Console.ReadLine()!.ToLower().Trim();
+        string[] arguments = Console.ReadLine()!.ToLower().Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        string command = arguments[0];
 
         bool commandExists = AvailableCommands.ContainsKey(command);
         if (commandExists)
         {
-            string[] arguments = command.Split(' ', StringSplitOptions.RemoveEmptyEntries);
             await AvailableCommands[command].RunCommand(arguments);
         }
     }

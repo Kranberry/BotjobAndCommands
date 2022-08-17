@@ -11,8 +11,28 @@ public class HelpCommand : ICommand
 
     public async ValueTask<CommandResponse> RunCommand(string[] parameters)
     {
-        ShowHelpPrompt();
+        string specificHelpCommand = parameters.Length > 1 ? parameters[1] : string.Empty;
+
+        if (string.IsNullOrEmpty(specificHelpCommand))
+            ShowHelpPrompt();
+        else
+            ShowHelpOfSpecificCommand(specificHelpCommand);
         return new CommandResponse(Command, "Available commands listed", null);
+    }
+
+    private void ShowHelpOfSpecificCommand(string command)
+    {
+        ICommand? theCommand = AvailableCommands.Values.FirstOrDefault(c => c.Command.ToLower() == command || c.ShortCommand?.ToLower() == command);
+        if (theCommand is null)
+            return;
+
+        Console.WriteLine("------------------------------------------HELP--------------------------------------");
+        Console.WriteLine("[Command] : [ShortCommand] | [Description]\n");
+
+        Console.WriteLine($"{theCommand.Command} : {theCommand.ShortCommand} | {theCommand.Description}");
+
+        Console.ResetColor();
+        Console.WriteLine("------------------------------------------------------------------------------------");
     }
 
     private void ShowHelpPrompt()
@@ -36,6 +56,7 @@ public class HelpCommand : ICommand
             commandsWrittenOut.Add(kvp.Value.Command);
             index++;
         }
+        Console.ResetColor();
         Console.WriteLine("------------------------------------------------------------------------------------");
     }
 }
